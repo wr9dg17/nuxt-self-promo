@@ -22,9 +22,20 @@
                                         placeholder="Your Email"
                                         autocomplete="email"
                                     />
-                                    <div v-if="$v.form.email.$error" class="form-error">
-                                        <span v-if="!$v.form.email.required" class="help is-danger">Email is required</span>
-                                        <span v-if="!$v.form.email.isEmail"  class="help is-danger">Email address is not valid</span>
+                                    <div
+                                        v-if="$v.form.email.$error"
+                                        class="form-error"
+                                    >
+                                        <span
+                                            v-if="!$v.form.email.required"
+                                            class="help is-danger"
+                                            >Email is required</span
+                                        >
+                                        <span
+                                            v-if="!$v.form.email.isEmail"
+                                            class="help is-danger"
+                                            >Email address is not valid</span
+                                        >
                                     </div>
                                 </div>
                             </div>
@@ -38,14 +49,21 @@
                                         placeholder="Your Password"
                                         autocomplete="current-password"
                                     />
-                                    <div v-if="$v.form.password.$error" class="form-error">
-                                        <span v-if="!$v.form.password.required" class="help is-danger">Password is required</span>
+                                    <div
+                                        v-if="$v.form.password.$error"
+                                        class="form-error"
+                                    >
+                                        <span
+                                            v-if="!$v.form.password.required"
+                                            class="help is-danger"
+                                            >Password is required</span
+                                        >
                                     </div>
                                 </div>
                             </div>
                             <!-- Login Button -->
                             <button
-                                @click.prevent="onSubmit"
+                                @click.prevent="onLogin"
                                 class="button is-block is-info is-large is-fullwidth"
                                 :disabled="$v.form.$invalid"
                             >
@@ -70,6 +88,7 @@
 import { required, email } from "vuelidate/lib/validators";
 
 export default {
+    middleware: "guest",
     data() {
         return {
             form: {
@@ -90,8 +109,19 @@ export default {
         },
     },
     methods: {
-        onSubmit() {
+        onLogin() {
             this.$v.form.$touch();
+
+            if (!this.$v.$invalid) {
+                this.$store
+                    .dispatch("auth/login", this.form)
+                    .then(() => this.$router.push("/"))
+                    .catch(() => {
+                        this.$toasted.error("Wrong email or password", {
+                            duration: 3000,
+                        });
+                    });
+            }
         },
     },
 };

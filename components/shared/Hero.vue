@@ -33,10 +33,7 @@ export default {};
     width: 100%;
     top: 0;
     left: 0;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+    background-size: cover !important;
 }
 .user-avatar {
     display: inline-block;

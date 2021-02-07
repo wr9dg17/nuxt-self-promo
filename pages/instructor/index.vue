@@ -10,7 +10,7 @@
                     </div>
                 </div>
                 <!-- Go to /instructor/blogs -->
-                <div class="box" @click="() => $router.push('/instructor/courses')">
+                <div class="box" @click="() => $router.push('/instructor/blogs')">
                     <div>
                         Blogs
                     </div>

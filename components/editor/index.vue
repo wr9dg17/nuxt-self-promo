@@ -1,6 +1,15 @@
 <template>
     <div class="editor editor-squished">
-        <BasicMenu :editor="editor" />
+        <BasicMenu :editor="editor">
+            <template #saveButton>
+                <button
+                    @click="emitEditorSaved"
+                    class="button is-success button-save"
+                >
+                    Save
+                </button>
+            </template>
+        </BasicMenu>
         <BubbleMenu :editor="editor" />
         <EditorContent class="editor__content" :editor="editor" />
     </div>
@@ -87,11 +96,52 @@ export default {
                 new CodeBlockHighlight(),
             ],
         });
+
+        // Option 1
+        // this.$emit("editorMounted", this.editor);
+        
+        // Option 2 (optimized)
+        this.$emit("editorMounted", this.setEditorInitialContent);
     },
     beforeDestroy() {
         this.editor.destroy();
     },
+    methods: {
+        emitEditorSaved() {
+            const html = this.editor.getHTML();
+            const title = this.getNodeValueByName("title");
+            const subtitle = this.getNodeValueByName("subtitle");
+
+            this.$emit("onEditorSaved", {
+                content: html,
+                title,
+                subtitle,
+            });
+        },
+        getNodeValueByName(name) {
+            const docContent = this.editor.state.doc.content;
+            const nodes = docContent.content;
+            const node = nodes.find((n) => n.type.name === name);
+
+            if (!node) return "";
+            return node.textContent;
+        },
+        setEditorInitialContent(content) {
+            this.editor.setContent(content);
+        },
+    },
 };
 </script>
 
-<style></style>
+<style scoped lang="scss">
+.button-save {
+    float: right;
+    background-color: #23d160;
+    &:hover {
+        background-color: #2bc76c;
+    }
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+</style>

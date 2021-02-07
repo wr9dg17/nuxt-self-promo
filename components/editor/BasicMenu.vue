@@ -38,9 +38,7 @@
             <button class="menubar__button" @click="commands.redo">
                 <icon name="redo" />
             </button>
-            <button class="button is-success button-save">
-                Save
-            </button>
+            <slot name="saveButton"></slot>
         </div>
     </editor-menu-bar>
 </template>
@@ -56,16 +54,3 @@ export default {
     },
 };
 </script>
-
-<style scoped lang="scss">
-.button-save {
-    float: right;
-    background-color: #23d160;
-    &:hover {
-        background-color: #2bc76c;
-    }
-    &:disabled {
-        cursor: not-allowed;
-    }
-}
-</style>

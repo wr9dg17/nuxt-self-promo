@@ -26,7 +26,7 @@
                         <div class="full-page-footer-col">
                             <div v-if="!isFirstStep">
                                 <a
-                                    @click.prevent="prevStep"
+                                    @click.prevent="_prevStep"
                                     class="button is-large"
                                     >Previous</a
                                 >
@@ -37,7 +37,7 @@
                             <div>
                                 <button
                                     v-if="!isLastStep"
-                                    @click.prevent="nextStep"
+                                    @click.prevent="_nextStep"
                                     :disabled="!canProceed"
                                     class="button is-large float-right"
                                 >
@@ -65,13 +65,14 @@ import { mapGetters } from "vuex";
 import Header from "~/components/shared/Header";
 import CourseCreateStep1 from "@/components/instructor/CourseCreateStep1";
 import CourseCreateStep2 from "@/components/instructor/CourseCreateStep2";
+import MultiComponentMixin from "~/mixins/multiComponent";
 
 export default {
     layout: "instructor",
     components: { Header, CourseCreateStep1, CourseCreateStep2 },
+    mixins: [MultiComponentMixin],
     data() {
         return {
-            activeStep: 1,
             steps: ["CourseCreateStep1", "CourseCreateStep2"],
             canProceed: false,
             form: {
@@ -81,14 +82,14 @@ export default {
         };
     },
     methods: {
-        prevStep() {
-            this.activeStep -= 1;
+        _prevStep() {
+            this.prevStep();
             this.$nextTick(() => {
                 this.canProceed = this.$refs.activeComponent.isValid;
             });
         },
-        nextStep() {
-            this.activeStep += 1;
+        _nextStep() {
+            this.nextStep();
             this.$nextTick(() => {
                 this.canProceed = this.$refs.activeComponent.isValid;
             });
@@ -106,18 +107,6 @@ export default {
         },
     },
     computed: {
-        stepsLength() {
-            return this.steps.length;
-        },
-        isFirstStep() {
-            return this.activeStep == 1;
-        },
-        isLastStep() {
-            return this.activeStep == this.stepsLength;
-        },
-        activeComponent() {
-            return this.steps[this.activeStep - 1];
-        },
         progress() {
             return `${(100 / this.stepsLength) * this.activeStep}%`;
         },

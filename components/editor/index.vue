@@ -4,6 +4,7 @@
             <template #saveButton>
                 <button
                     @click="emitEditorSaved"
+                    :disabled="isSaving"
                     class="button is-success button-save"
                 >
                     Save
@@ -49,6 +50,12 @@ export default {
         BasicMenu,
         BubbleMenu,
         EditorContent,
+    },
+    props: {
+        isSaving: {
+            required: false,
+            default: false,
+        },
     },
     data() {
         return {
@@ -97,10 +104,6 @@ export default {
             ],
         });
 
-        // Option 1
-        // this.$emit("editorMounted", this.editor);
-        
-        // Option 2 (optimized)
         this.$emit("editorMounted", this.setEditorInitialContent);
     },
     beforeDestroy() {
@@ -108,16 +111,22 @@ export default {
     },
     methods: {
         emitEditorSaved() {
+            const content = this.getContent();
+            this.$emit("onEditorSaved", content);
+        },
+        
+        getContent() {
             const html = this.editor.getHTML();
             const title = this.getNodeValueByName("title");
             const subtitle = this.getNodeValueByName("subtitle");
 
-            this.$emit("onEditorSaved", {
+            return {
                 content: html,
                 title,
                 subtitle,
-            });
+            }
         },
+
         getNodeValueByName(name) {
             const docContent = this.editor.state.doc.content;
             const nodes = docContent.content;
@@ -126,6 +135,7 @@ export default {
             if (!node) return "";
             return node.textContent;
         },
+
         setEditorInitialContent(content) {
             this.editor.setContent(content);
         },

@@ -15,38 +15,87 @@
                             </button>
                         </div>
                     </div>
+
                     <div class="tabs">
                         <ul>
-                            <li><a>Drafts</a></li>
-                            <li><a>Published</a></li>
+                            <li @click="activeTab = 0">
+                                <a :class="{ 'is-active': activeTab === 0 }"
+                                    >Drafts</a
+                                >
+                            </li>
+                            <li @click="activeTab = 1">
+                                <a :class="{ 'is-active': activeTab === 1 }"
+                                    >Published</a
+                                >
+                            </li>
                         </ul>
                     </div>
+
                     <div class="blogs-container">
-                        <template>
-                            <div>
-                                <div class="blog-card">
-                                    <h2>Some Title</h2>
+                        <!-- Drafts -->
+                        <template v-if="activeTab === 0">
+                            <div v-if="drafts && drafts.length > 0">
+                                <div
+                                    v-for="dBlog in drafts"
+                                    :key="dBlog._id"
+                                    class="blog-card"
+                                >
+                                    <h2>{{ dBlog.title }}</h2>
                                     <div class="blog-card-footer">
                                         <span>
-                                            Last Edited 17th December, 2018
+                                            Last Edited
+                                            {{
+                                                dBlog.updatedAt
+                                                    | formatDate("LLLL")
+                                            }}
                                         </span>
-                                        <!-- Dropdown with menu here -->
-                                    </div>
-                                </div>
-                                <div class="blog-card">
-                                    <h2>Some Title</h2>
-                                    <div class="blog-card-footer">
-                                        <span>
-                                            Last Edited 17th December, 2018
-                                        </span>
-                                        <!-- Dropdown with menu here -->
+                                        <Dropdown
+                                            @optionChanged="
+                                                handleOptionChange(
+                                                    $event,
+                                                    dBlog
+                                                )
+                                            "
+                                            :items="draftOptions"
+                                        />
                                     </div>
                                 </div>
                             </div>
-                            <!-- In case of no drafts blogs  -->
-                            <!-- <div class="blog-error">
-                              No Drafts :(
-                            </div> -->
+                            <div v-else class="blog-error">No Drafts :(</div>
+                        </template>
+
+                        <!-- Published -->
+                        <template v-if="activeTab === 1">
+                            <div v-if="published && published.length > 0">
+                                <div
+                                    v-for="pBlog in published"
+                                    :key="pBlog._id"
+                                    class="blog-card"
+                                >
+                                    <h2>{{ pBlog.title }}</h2>
+                                    <div class="blog-card-footer">
+                                        <span>
+                                            Last Edited
+                                            {{
+                                                pBlog.updatedAt
+                                                    | formatDate("LLLL")
+                                            }}
+                                        </span>
+                                        <Dropdown
+                                            @optionChanged="
+                                                handleOptionChange(
+                                                    $event,
+                                                    pBlog
+                                                )
+                                            "
+                                            :items="publishedOptions"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="blog-error">
+                                No Published Blogs :(
+                            </div>
                         </template>
                     </div>
                 </div>
@@ -54,15 +103,77 @@
         </div>
     </div>
 </template>
+
 <script>
+import { mapGetters } from "vuex";
+import {
+    commands,
+    createPublishedOptions,
+    createDraftOptions,
+} from "~/pages/instructor/options";
+
 import Header from "~/components/shared/Header";
+import Dropdown from "~/components/shared/Dropdown";
+
 export default {
     layout: "instructor",
-    components: { Header },
+    components: { Header, Dropdown },
+    data() {
+        return {
+            activeTab: 0,
+        };
+    },
+    computed: {
+        ...mapGetters({
+            drafts: "instructor/blog/getDraftBlogs",
+            published: "instructor/blog/getPublishedBlogs",
+        }),
+        publishedOptions() {
+            return createPublishedOptions();
+        },
+        draftOptions() {
+            return createDraftOptions();
+        },
+    },
+    methods: {
+        setActiveTab(num) {
+            this.activeTab = num;
+        },
+
+        handleOptionChange(command, blog) {
+            if (command == commands.EDIT_BLOG) {
+                this.$router.push(`/instructor/blog/${blog._id}/edit`);
+            }
+            if (command == commands.DELETE_BLOG) {
+                this.displayDeleteWarning(blog);
+            }
+        },
+
+        displayDeleteWarning(blog) {
+            const isConfirmed = confirm("Are you sure?");
+            isConfirmed &&
+                this.$store
+                    .dispatch("instructor/blog/deleteBlog", blog)
+                    .then(() => {
+                        this.$toasted.success("Blog post deleted", {
+                            duration: 2000,
+                        });
+                    });
+        },
+    },
+    async fetch({ store }) {
+        await store.dispatch("instructor/blog/fetchUserBlogs");
+    },
 };
 </script>
 
 <style scoped lang="scss">
+.tabs {
+    a.is-active {
+        border-bottom-color: #363636;
+        color: #363636;
+    }
+}
 .blog-error {
     font-size: 35px;
 }

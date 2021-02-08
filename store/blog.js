@@ -3,6 +3,7 @@ export const state = () => ({
         all: [],
         featured: [],
     },
+    item: {},
 });
 
 export const getters = {
@@ -12,11 +13,17 @@ export const getters = {
     getFeaturedBlogs(state) {
         return state.items.featured;
     },
+    getBlog(state) {
+        return state.item;
+    },
 };
 
 export const mutations = {
     setBlogs(state, { resource, blogs }) {
         state.items[resource] = blogs;
+    },
+    setBlog(state, blog) {
+        state.item = blog;
     },
 };
 
@@ -31,6 +38,16 @@ export const actions = {
                     blogs,
                 });
                 return state.items.all;
+            })
+            .catch((error) => Promise.reject(error));
+    },
+
+    fetchBlogBySlug({ state, commit }, slug) {
+        return this.$axios
+            .$get("/api/v1/blogs/s/" + slug)
+            .then((blog) => {
+                commit("setBlog", blog);
+                return state.item;
             })
             .catch((error) => Promise.reject(error));
     },

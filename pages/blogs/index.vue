@@ -3,67 +3,53 @@
         <div class="main-content">
             <div class="container">
                 <div class="columns is-mobile">
-                    <!-- posts -->
                     <div class="column is-8">
-                        <!-- blog -->
-                        <div class="section">
+                        <div
+                            v-for="blog in pBlogs"
+                            :key="blog._id"
+                            class="section"
+                        >
                             <div class="post">
                                 <div
-                                    @click="() => {}"
+                                    @click="$router.push(`/blogs/${blog.slug}`)"
                                     class="post-header clickable"
                                 >
-                                    <h4 class="title is-4">Some Blog Title</h4>
+                                    <h4 class="title is-4">{{ blog.title }}</h4>
                                     <h5 class="subtitle is-5">
-                                        Some Blog Subtitle
+                                        {{ blog.subtitle }}
                                     </h5>
                                 </div>
                                 <div class="post-content">
-                                    by Filip Jerga, Jul 1
+                                    {{ blog.author.name }}
+                                    {{ blog.updatedAt | formatDate("LLLL") }}
                                 </div>
                             </div>
                         </div>
-                        <div class="section">
-                            <div class="post">
-                                <div
-                                    @click="() => {}"
-                                    class="post-header clickable"
-                                >
-                                    <h4 class="title is-4">Some Blog Title</h4>
-                                    <h5 class="subtitle is-5">
-                                        Some Blog Subtitle
-                                    </h5>
-                                </div>
-                                <div class="post-content">
-                                    by Filip Jerga, Jul 1
-                                </div>
-                            </div>
-                        </div>
-                        <!-- end of blog -->
-                        <!-- pagination -->
+                        <!-- Blog post -->
+
                         <div class="section"></div>
-                        <!-- end of pagination -->
+                        <!-- Pagination -->
                     </div>
-                    <!-- side bar -->
+                    <!-- Blog posts -->
+
                     <div class="column is-4 is-narrow">
-                        <!-- featured -->
                         <div class="section">
                             <div class="sidebar">
                                 <div class="sidebar-header">
                                     <h4 class="title is-4">Featured Posts</h4>
                                 </div>
                                 <div class="sidebar-list">
-                                    <!-- Featured Blogs -->
                                     <p>
-                                        <nuxt-link :to="``"
-                                            >Some favorite blog</nuxt-link
-                                        >
+                                        <nuxt-link :to="``">
+                                            Some favorite blog
+                                        </nuxt-link>
                                     </p>
-                                    <!-- Featured Blogs -->
+                                    <!-- Featured blog post -->
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- end of side bar -->
+                    <!-- Sidebar -->
                 </div>
             </div>
         </div>
@@ -71,10 +57,17 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
+    computed: {
+        ...mapGetters({
+            pBlogs: "blog/getAllBlogs",
+        }),
+    },
     async fetch({ store }) {
         await store.dispatch("blog/fetchBlogs");
-    }
+    },
 };
 </script>
 

@@ -27,7 +27,17 @@
                         </div>
                         <!-- Blog post -->
 
-                        <div class="section"></div>
+                        <div class="section">
+                            <no-ssr placeholder="Loading...">
+                                <paginate
+                                    :page-count="5"
+                                    :click-handler="onPaginationClick"
+                                    :prev-text="'Prev'"
+                                    :next-text="'Next'"
+                                    :container-class="'paginationContainer'">
+                                </paginate>
+                            </no-ssr>
+                        </div>
                         <!-- Pagination -->
                     </div>
                     <!-- Blog posts -->
@@ -36,12 +46,15 @@
                         <div class="section">
                             <div class="sidebar">
                                 <div class="sidebar-header">
-                                    <h4 class="title is-4">Featured Posts</h4>
+                                    <h4 class="title is-4">Featured Blogs</h4>
                                 </div>
                                 <div class="sidebar-list">
-                                    <p>
-                                        <nuxt-link :to="``">
-                                            Some favorite blog
+                                    <p
+                                        v-for="blog in fBlogs"
+                                        :key="blog._id"
+                                    >
+                                        <nuxt-link :to="`/blogs/${blog.slug}`">
+                                            {{ blog.title }}
                                         </nuxt-link>
                                     </p>
                                     <!-- Featured blog post -->
@@ -63,10 +76,19 @@ export default {
     computed: {
         ...mapGetters({
             pBlogs: "blog/getAllBlogs",
+            fBlogs: "blog/getFeaturedBlogs",
         }),
+    },
+    methods: {
+        onPaginationClick() {
+            console.log("123123");
+        },
     },
     async fetch({ store }) {
         await store.dispatch("blog/fetchBlogs");
+        await store.dispatch("blog/fetchFeaturedBlogs", {
+            "filter[featured]": true,
+        });
     },
 };
 </script>

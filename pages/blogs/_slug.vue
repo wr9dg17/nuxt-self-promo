@@ -8,7 +8,9 @@
                     :date="blog.createdAt | formatDate"
                 />
             </div>
-            <div class="blog-content" v-html="blog.content"></div>
+            <div class="blog-content">
+                <EditorView :initialContent="blog.content" />
+            </div>
         </div>
     </div>
 </template>
@@ -16,10 +18,12 @@
 <script>
 import { mapGetters } from "vuex";
 import UserTile from "@/components/shared/UserTile";
+import EditorView from "@/components/editor/EditorView.vue";
 
 export default {
     components: {
-        UserTile
+        UserTile,
+        EditorView,
     },
     computed: {
         ...mapGetters({

@@ -44,19 +44,11 @@
                                     <div class="blog-card-footer">
                                         <span>
                                             Last Edited
-                                            {{
-                                                dBlog.updatedAt
-                                                    | formatDate("LLLL")
-                                            }}
+                                            {{ dBlog.updatedAt | formatDate("LLLL") }}
                                         </span>
                                         <Dropdown
-                                            @optionChanged="
-                                                handleOptionChange(
-                                                    $event,
-                                                    dBlog
-                                                )
-                                            "
-                                            :items="draftOptions"
+                                            @optionChanged="handleOptionChange($event, dBlog)"
+                                            :items="draftOptions()"
                                         />
                                     </div>
                                 </div>
@@ -71,24 +63,17 @@
                                     v-for="pBlog in published"
                                     :key="pBlog._id"
                                     class="blog-card"
+                                    :class="{featured: pBlog.featured}"
                                 >
                                     <h2>{{ pBlog.title }}</h2>
                                     <div class="blog-card-footer">
                                         <span>
                                             Last Edited
-                                            {{
-                                                pBlog.updatedAt
-                                                    | formatDate("LLLL")
-                                            }}
+                                            {{ pBlog.updatedAt | formatDate("LLLL") }}
                                         </span>
                                         <Dropdown
-                                            @optionChanged="
-                                                handleOptionChange(
-                                                    $event,
-                                                    pBlog
-                                                )
-                                            "
-                                            :items="publishedOptions"
+                                            @optionChanged="handleOptionChange($event, pBlog)"
+                                            :items="publishedOptions(pBlog.featured)"
                                         />
                                     </div>
                                 </div>
@@ -128,28 +113,47 @@ export default {
             drafts: "instructor/blog/getDraftBlogs",
             published: "instructor/blog/getPublishedBlogs",
         }),
-        publishedOptions() {
-            return createPublishedOptions();
-        },
-        draftOptions() {
-            return createDraftOptions();
-        },
     },
     methods: {
         setActiveTab(num) {
             this.activeTab = num;
         },
 
+        publishedOptions(isFeatured) {
+            return createPublishedOptions(isFeatured);
+        },
+
+        draftOptions() {
+            return createDraftOptions();
+        },
+
         handleOptionChange(command, blog) {
             if (command == commands.EDIT_BLOG) {
                 this.$router.push(`/instructor/blog/${blog._id}/edit`);
             }
+            if (command == commands.TOGGLE_FEATURE) {
+                this.updateBlog(blog);
+            }
             if (command == commands.DELETE_BLOG) {
-                this.displayDeleteWarning(blog);
+                this.deleteBlog(blog);
             }
         },
 
-        displayDeleteWarning(blog) {
+        updateBlog(blog) {
+            const featured = !blog.featured;
+            this.$store
+                .dispatch("instructor/blog/updateBlogPusblishedStatus", {
+                    id: blog._id,
+                    data: { featured },
+                })
+                .then(() => {
+                    this.$toasted.success("Blog published status updated", {
+                        duration: 2000,
+                    });
+                });
+        },
+
+        deleteBlog(blog) {
             const isConfirmed = confirm("Are you sure?");
             isConfirmed &&
                 this.$store
@@ -189,7 +193,7 @@ export default {
     }
     &.featured {
         border-left: 5px solid #3cc314;
-        padding-left: 10px;
+        padding-left: 20px;
         transition: border ease-out 0.2s;
     }
 }

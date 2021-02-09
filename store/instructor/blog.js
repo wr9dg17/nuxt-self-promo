@@ -1,3 +1,5 @@
+import Vue from "vue";
+
 export const state = () => ({
     item: {},
     items: {
@@ -23,17 +25,20 @@ export const getters = {
 };
 
 export const mutations = {
+    setSaving(state, isSaving) {
+        state.isSaving = isSaving;
+    },
     setBlog(state, blog) {
         state.item = blog;
     },
-    deleteBlog(state, { res, index }) {
-        state.items[res].splice(index, 1);
+    setPublishedBlog(state, { blog, index }) {
+        Vue.set(state.items.published, index, blog);
     },
     setBlogs(state, { resource, items }) {
         state.items[resource] = items;
     },
-    setSaving(state, isSaving) {
-        state.isSaving = isSaving;
+    deleteBlog(state, { res, index }) {
+        state.items[res].splice(index, 1);
     },
 };
 
@@ -82,6 +87,19 @@ export const actions = {
                 commit("setBlog", blog);
                 commit("setSaving", false);
                 return state.item;
+            })
+            .catch((error) => Promise.reject(error));
+    },
+
+    updateBlogPusblishedStatus({ state, commit }, { id, data }) {
+        return this.$axios
+            .$patch("/api/v1/blogs/" + id, data)
+            .then((blog) => {
+                const index = state.items["published"].findIndex((b) => {
+                    return b._id == id;
+                });
+                commit("setPublishedBlog", {blog, index});
+                return blog;
             })
             .catch((error) => Promise.reject(error));
     },

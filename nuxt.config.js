@@ -34,7 +34,9 @@ module.exports = {
     plugins: [
         { src: "~/plugins/filters" },
         { src: "~/plugins/vuelidate" },
+        { src: "~/plugins/integrations" },
         { src: "~/plugins/toasted", ssr: false },
+        { src: "~/plugins/paginate", ssr: false },
     ],
     /*
      ** Nuxt.js modules

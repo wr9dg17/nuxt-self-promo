@@ -28,15 +28,17 @@
                         <!-- Blog post -->
 
                         <div class="section">
-                            <no-ssr placeholder="Loading...">
+                            <client-only placeholder="Loading...">
                                 <paginate
-                                    :page-count="5"
+                                    v-model="currentPage"
+                                    :page-count="pagination.pageCount"
                                     :click-handler="onPaginationClick"
                                     :prev-text="'Prev'"
                                     :next-text="'Next'"
-                                    :container-class="'paginationContainer'">
+                                    :container-class="'paginationContainer'"
+                                >
                                 </paginate>
-                            </no-ssr>
+                            </client-only>
                         </div>
                         <!-- Pagination -->
                     </div>
@@ -49,10 +51,7 @@
                                     <h4 class="title is-4">Featured Blogs</h4>
                                 </div>
                                 <div class="sidebar-list">
-                                    <p
-                                        v-for="blog in fBlogs"
-                                        :key="blog._id"
-                                    >
+                                    <p v-for="blog in fBlogs" :key="blog._id">
                                         <nuxt-link :to="`/blogs/${blog.slug}`">
                                             {{ blog.title }}
                                         </nuxt-link>
@@ -77,15 +76,45 @@ export default {
         ...mapGetters({
             pBlogs: "blog/getAllBlogs",
             fBlogs: "blog/getFeaturedBlogs",
+            pagination: "blog/getPagination",
         }),
-    },
-    methods: {
-        onPaginationClick() {
-            console.log("123123");
+        currentPage: {
+            get() {
+                return this.$store.state.blog.pagination.pageNum;
+            },
+            set(value) {
+                this.$store.commit("blog/setPage", value);
+            },
         },
     },
-    async fetch({ store }) {
-        await store.dispatch("blog/fetchBlogs");
+    methods: {
+        setPaginationQueryParameters() {
+            const { pageNum, pageSize } = this.pagination;
+            this.$router.push({ query: { pageNum, pageSize } });
+        },
+        onPaginationClick() {
+            this.$store
+                .dispatch("blog/fetchBlogs", {
+                    pageNum: this.pagination.pageNum,
+                    pageSize: this.pagination.pageSize,
+                })
+                .then(() => this.setPaginationQueryParameters());
+        },
+    },
+    async fetch({ store, query }) {
+        const filter = {};
+        const { pageNum, pageSize } = query;
+
+        if (pageNum && pageSize) {
+            filter.pageNum = parseInt(pageNum, 10);
+            filter.pageSize = parseInt(pageSize, 10);
+            store.commit("blog/setPage", pageNum);
+        } else {
+            filter.pageNum = store.state.blog.pagination.pageNum;
+            filter.pageSize = store.state.blog.pagination.pageSize;
+        }
+
+        await store.dispatch("blog/fetchBlogs", filter);
         await store.dispatch("blog/fetchFeaturedBlogs", {
             "filter[featured]": true,
         });

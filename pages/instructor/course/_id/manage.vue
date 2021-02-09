@@ -14,8 +14,65 @@
                         Save
                     </button>
                 </div>
+
+                <div class="full-page-takeover-header-button">
+                    <Modal
+                        openTitle="Favorite"
+                        openBtnClass="button is-primary is-inverted is-medium is-outlined"
+                        title="Make Course Hero"
+                        @opened="applyCourseValuesToModal"
+                        @submitted="handleHeroModalSubmit"
+                    >
+                        <div>
+                            <form>
+                                <div class="field">
+                                    <label class="label">Hero title</label>
+                                    <span class="label-info"
+                                        >Suggested 64 Characters</span
+                                    >
+                                    <div class="control">
+                                        <input
+                                            v-model="courseHero.title"
+                                            class="input is-medium"
+                                            type="text"
+                                            placeholder="Amazing course discount"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label class="label">Hero subtitle</label>
+                                    <span class="label-info">
+                                        Suggested 128 Characters
+                                    </span>
+                                    <input
+                                        v-model="courseHero.subtitle"
+                                        class="input is-medium"
+                                        type="text"
+                                        placeholder="Get all of the course for 9.99$"
+                                    />
+                                </div>
+                                <div class="field">
+                                    <label class="label">Hero image</label>
+                                    <span class="label-info">
+                                        Image in format 3 by 1 (720 x240)
+                                    </span>
+                                    <input
+                                        v-model="courseHero.image"
+                                        class="input is-medium"
+                                        type="text"
+                                        placeholder="Some image in format 3 by 1 (720 x 240)"
+                                    />
+                                    <figure class="image is-3by1">
+                                        <img :src="courseHero.image" />
+                                    </figure>
+                                </div>
+                            </form>
+                        </div>
+                    </Modal>
+                </div>
             </template>
         </Header>
+
         <div class="course-manage">
             <div class="container">
                 <div class="columns">
@@ -88,20 +145,23 @@
 
 <script>
 import Header from "~/components/shared/Header";
+import Modal from "~/components/shared/Modal";
 import TargetStudents from "~/components/instructor/TargetStudents";
 import LandingPage from "~/components/instructor/LandingPage";
 import Price from "~/components/instructor/Price";
 import Status from "~/components/instructor/Status";
-import MultiComponentMixin from "~/mixins/multiComponent";
+
 import { mapGetters } from "vuex";
+import MultiComponentMixin from "~/mixins/multiComponent";
 
 export default {
     layout: "instructor",
-    components: { Header, TargetStudents, LandingPage, Price, Status },
+    components: { Header, Modal, TargetStudents, LandingPage, Price, Status },
     mixins: [MultiComponentMixin],
     data() {
         return {
             steps: ["TargetStudents", "LandingPage", "Price", "Status"],
+            courseHero: {},
         };
     },
     computed: {
@@ -117,6 +177,7 @@ export default {
                 field,
             });
         },
+
         onCourseUpdate() {
             this.$store
                 .dispatch("instructor/course/updateCourse")
@@ -132,6 +193,26 @@ export default {
                         { duration: 2000 }
                     )
                 );
+        },
+
+        applyCourseValuesToModal() {
+            this.$set(this.courseHero, "title", this.course.title);
+            this.$set(this.courseHero, "subtitle", this.course.subtitle);
+            this.$set(this.courseHero, "image", this.course.image);
+        },
+
+        handleHeroModalSubmit({ closeModal }) {
+            const heroData = { ...this.courseHero };
+            heroData.product = { ...this.course };
+
+            this.$store.dispatch("hero/createHero", heroData)
+                .then(() => {
+                    closeModal();
+                    this.$toasted.success(
+                        "Course Hero was created",
+                        { duration: 2000 }
+                    )
+                });
         },
     },
     async fetch({ store, params }) {

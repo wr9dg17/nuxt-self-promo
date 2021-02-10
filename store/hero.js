@@ -18,7 +18,17 @@ export const actions = {
             .$post("/api/v1/product-heroes", data)
             .then((hero) => {
                 commit("setHero", hero);
-                return state.courseHero;
+                return state.item;
+            })
+            .catch((error) => Promise.reject(error));
+    },
+
+    fetchHero({ state, commit }) {
+        return this.$axios
+            .$get("/api/v1")
+            .then(({ productHero }) => {
+                commit("setHero", productHero);
+                return state.item;
             })
             .catch((error) => Promise.reject(error));
     },

@@ -1,6 +1,11 @@
 <template>
     <div>
-        <Hero />
+        <Hero
+            :title="hero.title"
+            :subtitle="hero.subtitle"
+            :image="hero.image"
+            :promoLink="hero.product.productLink"
+        />
         <section class="section">
             <div class="container">
                 <h1 class="title">Featured Courses</h1>
@@ -46,6 +51,7 @@ export default {
     },
     computed: {
         ...mapState({
+            hero: (state) => state.hero.item,
             courses: (state) => state.course.items,
             fBlogs: (state) => state.blog.items.featured,
         }),

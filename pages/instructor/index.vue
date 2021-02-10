@@ -3,23 +3,14 @@
         <Header />
         <div class="centered">
             <div class="columns">
-                <!-- Go to /instructor/courses -->
-                <div class="box" @click="() => $router.push('/instructor/courses')">
-                    <div>
-                        Courses
-                    </div>
+                <div class="box" @click="$router.push('/instructor/courses')">
+                    <div>Courses</div>
                 </div>
-                <!-- Go to /instructor/blogs -->
-                <div class="box" @click="() => $router.push('/instructor/blogs')">
-                    <div>
-                        Blogs
-                    </div>
+                <div class="box" @click="$router.push('/instructor/blogs')">
+                    <div>Blogs</div>
                 </div>
-                <!-- Go to /instructor/heroes -->
-                <div class="box" @click="() => $router.push('/instructor/courses')">
-                    <div>
-                        Heroes
-                    </div>
+                <div class="box" @click="$router.push('/instructor/heroes')">
+                    <div>Heroes</div>
                 </div>
             </div>
         </div>
